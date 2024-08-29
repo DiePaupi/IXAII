@@ -1,0 +1,12 @@
+.app-header {
+    height: 60px;
+    line-height: 60px;
+    border-bottom: thin lightgrey solid;
+}
+
+h2.app-header {
+    color: blue;
+    font-size: 22px;
+    font-variant: small-caps;
+    padding-left: 5px;
+}
