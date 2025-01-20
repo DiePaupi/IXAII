@@ -722,7 +722,7 @@ app.layout = dbc.Container([
                     dbc.Input(id='sepal_length-input', placeholder=str(avg_feauture_values[0][0]),
                               type='number', step='0.1',
                               min=str(feature_ranges[0][0]), max=str(feature_ranges[0][1])),
-                    dbc.InputGroupText("= Sepal Length (cm)", id='input_label_sepal_length'),
+                    dbc.InputGroupText("= Sepal Length (cm)", style={"width": "150px"}, id='input_label_sepal_length'),
                     dbc.Tooltip(html.Div([
                             html.Div("Length of the sepal (in cm)"),
                             html.Div(" - "),
@@ -735,7 +735,7 @@ app.layout = dbc.Container([
                     dbc.Input(id='sepal_width-input', placeholder=str(avg_feauture_values[0][1]),
                               type='number', step='0.1',
                               min=str(feature_ranges[1][0]), max=str(feature_ranges[1][1])),
-                    dbc.InputGroupText("= Sepal Width (cm)", id='input_label_sepal_width'),
+                    dbc.InputGroupText("= Sepal Width (cm)", style={"width": "150px"}, id='input_label_sepal_width'),
                     dbc.Tooltip(html.Div([
                             html.Div("Width of the sepal (in cm)"),
                             html.Div(" - "),
@@ -748,7 +748,7 @@ app.layout = dbc.Container([
                     dbc.Input(id='petal_length-input', placeholder=str(avg_feauture_values[0][2]),
                               type='number', step='0.1',
                               min=str(feature_ranges[2][0]), max=str(feature_ranges[2][1])),
-                    dbc.InputGroupText("= Petal Length (cm)", id='input_label_petal_length'),
+                    dbc.InputGroupText("= Petal Length (cm)", style={"width": "150px"}, id='input_label_petal_length'),
                     dbc.Tooltip(html.Div([
                             html.Div("Length of the petal (in cm)"),
                             html.Div(" - "),
@@ -761,7 +761,7 @@ app.layout = dbc.Container([
                     dbc.Input(id='petal_width-input', placeholder=str(avg_feauture_values[0][3]),
                               type='number', step='0.1',
                               min=str(feature_ranges[3][0]), max=str(feature_ranges[3][1])),
-                    dbc.InputGroupText("= Petal Width (cm)", id='input_label_petal_width'),
+                    dbc.InputGroupText("= Petal Width (cm)", style={"width": "150px"}, id='input_label_petal_width'),
                     dbc.Tooltip(html.Div([
                             html.Div("Width of the petal (in cm)"),
                             html.Div(" - "),
@@ -776,7 +776,7 @@ app.layout = dbc.Container([
             dbc.Row([
                 dbc.Col([
                     dbc.Button("Generate Prediction", id='predict_button', type='submit', n_clicks=0,
-                               outline=True, color='primary', size='sm', className='me-1')
+                               outline=True, color='info', className='me-1')
                 ], width={'size': 8, 'offset': 2})
             ]),
 
@@ -873,6 +873,7 @@ def switch_to_dev_user_profile(dev_nc, user_nc, business_nc, regulatory_nc, affe
     # 4 should be checked in any case: add the explanation tab
     if 4 in exp_values_to_apply:
         examples_tab_def = dbc.Tab([
+                html.P(" ", className='mt-3'),
                 dbc.Tabs(new_examples_list, id='example_subtabs')
                 ],
                 label="Examples", id='example_exp_tab_label',
