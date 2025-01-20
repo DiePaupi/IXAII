@@ -161,6 +161,59 @@ starting_tab = dbc.Tab(
                 tab_style={'font-weight': 'bold'})
 
 
+# --- Guide Tab -----------------------------------------------------------------------------
+guide_tab = dbc.Tab([
+                html.P("This guide provides some example questions that point you to the explanation "
+                       + "which can be used to answer them!",
+                        className='mt-3'),
+                dbc.Card( dbc.CardBody([
+                    html.H4("Feature Importance:"),
+                    dbc.Table([
+                                # Header
+                                #html.Thead(html.Tr([html.Th("Column 1"), html.Th("Column 2")])),
+                                # Body
+                                html.Tbody([
+                                    html.Tr([html.Td("Which features consistently drive the model’s predictions across a group of instances?"),
+                                             html.Td("Global LIME or SHAP plots")]),
+                                    html.Tr([html.Td("Which features were most influential for this particular prediction?"), 
+                                             html.Td("Local LIME or SHAP plots")]),
+                                    html.Tr([html.Td("Why did this instance receive a positive (or negative) outcome?"),
+                                             html.Td("Local SHAP waterfall plot")]),
+                                ])
+                            ],
+                            bordered=False, className='mt-4 table-hover'),
+                        # Which features were most influential for this particular prediction? -> Local LIME or SHAP plots
+                        # Why did this instance receive a positive (or negative) outcome? -> Local SHAP waterfall plot
+                        # Which features consistently drive the model’s predictions across a group of instances? -> Global LIME or SHAP plots
+
+                    html.H4("Class Rules:"),
+                    dbc.Table([ html.Tbody([
+                                    html.Tr([html.Td("What combination of feature conditions guarantees this outcome with high confidence?")]),
+                                    html.Tr([html.Td("If I slightly change certain feature values, does the prediction remain the same or switch to another class?")])
+                                ])
+                            ],
+                            bordered=False, className='mt-4 table-hover'),
+                        # What combination of feature conditions guarantees this outcome with high confidence?
+                        # If I slightly change certain feature values, does the prediction remain the same or switch to another class?
+                        # --> Could also be answered by Examples - Similar Inputs
+                    
+                    html.H4("Examples"),
+                    dbc.Table([ html.Tbody([
+                                    html.Tr([html.Td("What are some plausible examples that would lead to a different predicted outcome?"),
+                                             html.Td("Other Classes")]),
+                                    html.Tr([html.Td("How do feature values need to change in order to receive a particular outcome?"), 
+                                             html.Td("Specific Classes")])
+                                ])
+                            ],
+                            bordered=False, className='mt-4 table-hover'),
+                        # What are some plausible examples that would lead to a different predicted outcome? -> Other Classes
+                        # How do feature values need to change in order to receive a particular outcome? -> Specific Classes
+                    ]), className='mt-3')
+                ],
+                label="Guide", id='guide_tab_label',
+                labelClassName='text-primary', tab_style={'font-weight': 'bold'})
+
+
 # --- Data Information Tab -----------------------------------------------------------------------------
 data_info_tab = dbc.Tab([
                     dbc.Tab([
@@ -623,14 +676,15 @@ settings_tab = dbc.Tab(
                                 dbc.Label("Please select the explanation types to display:"),
                                 dbc.Checklist(
                                     options=[
-                                        {"label": "Data Information", "value": 0},
-                                        {"label": "Data Exploration", "value": 1},
-                                        {"label": "Feature Importance", "value": 2},
-                                        {"label": "Class Rules", "value": 3},
-                                        {"label": "Examples", "value": 4},
-                                        {"label": "Examples - Similar Inputs", "value": 5},
-                                        {"label": "Examples - Other Classes", "value": 6},
-                                        {"label": "Examples - Specific Classes", "value": 7}
+                                        {"label": "Guide", "value": 0},
+                                        {"label": "Data Information", "value": 1},
+                                        {"label": "Data Exploration", "value": 2},
+                                        {"label": "Feature Importance", "value": 3},
+                                        {"label": "Class Rules", "value": 4},
+                                        {"label": "Examples", "value": 5},
+                                        {"label": "Examples - Similar Inputs", "value": 6},
+                                        {"label": "Examples - Other Classes", "value": 7},
+                                        {"label": "Examples - Specific Classes", "value": 8}
                                     ],
                                     value=[], id="explanations_toggle_input",
                                 ),
@@ -647,23 +701,23 @@ settings_tab = dbc.Tab(
 #  User Profile Definitions
 #############################################################################################################
 
-dev_user_profile_values = [0, 1, 2, 3, 4, 5, 6, 7] # Data Info, Data Exploration, Feature Importance, Class Rules, and Examples
+dev_user_profile_values = [1, 2, 3, 4, 5, 6, 7, 8] # Data Info, Data Exploration, Feature Importance, Class Rules, and Examples
 #dev_user_profile_list = [data_info_tab, data_exp_tab, feature_importance_exp_tab, class_rules_exp_tab, settings_tab ]
 #dev_user_examples_list = [what_if_subtab, why_not_subtab, when_subtab]
 
-user_user_profile_vlaues = [0, 2, 4, 5, 6]   # Data Info, Feature Importance, and Examples
+user_user_profile_vlaues = [0, 1, 3, 5, 6, 7]   # Data Info, Feature Importance, and Examples
 #user_user_profile_list = [data_info_tab, feature_importance_exp_tab, settings_tab ]
 #user_user_examples_list = [what_if_subtab, why_not_subtab]
 
-business_user_profile_vlaues = [0, 2, 4, 5, 6]   # Data Info, Feature Importance, and Examples
+business_user_profile_vlaues = [0, 1, 3, 5, 6, 7]   # Data Info, Feature Importance, and Examples
 #business_user_profile_list = [data_info_tab, feature_importance_exp_tab, settings_tab ]
 #business_user_examples_list = [what_if_subtab, why_not_subtab]
 
-regulatory_user_profile_vlaues = [0, 1, 2, 4, 7]  # Data Info, Data Exploration, Feature Importance, and Examples
+regulatory_user_profile_vlaues = [0, 1, 2, 3, 5, 8]  # Data Info, Data Exploration, Feature Importance, and Examples
 #regulatory_user_profile_list = [data_info_tab, data_exp_tab, feature_importance_exp_tab, settings_tab ]
 #regulatory_user_examples_list = [when_subtab]
 
-affected_user_profile_vlaues = [0, 2, 4, 5, 6]  # Data Info, Feature Importance, and Examples
+affected_user_profile_vlaues = [0, 1, 3, 5, 6, 7]  # Data Info, Feature Importance, and Examples
 #affected_user_profile_list = [data_info_tab, feature_importance_exp_tab, settings_tab ]
 #affected_user_examples_list = [what_if_subtab, why_not_subtab]
 
@@ -839,7 +893,7 @@ def switch_to_dev_user_profile(dev_nc, user_nc, business_nc, regulatory_nc, affe
         case 'explanations_toggle_input':
             exp_values_to_apply = exp_toggle_values
         case _:
-            return [starting_tab, settings_tab], []
+            return [starting_tab, guide_tab, settings_tab], []
 
     new_exp_list = []
     new_examples_list = []
@@ -847,31 +901,34 @@ def switch_to_dev_user_profile(dev_nc, user_nc, business_nc, regulatory_nc, affe
 
     # Check the normal explanation tabs
     if 0 in exp_values_to_apply:
-        new_exp_list.append(data_info_tab)
+        new_exp_list.append(guide_tab)
         new_exp_val_list.append(0)
     if 1 in exp_values_to_apply:
-        new_exp_list.append(data_exp_tab)
+        new_exp_list.append(data_info_tab)
         new_exp_val_list.append(1)
     if 2 in exp_values_to_apply:
-        new_exp_list.append(feature_importance_exp_tab)
+        new_exp_list.append(data_exp_tab)
         new_exp_val_list.append(2)
     if 3 in exp_values_to_apply:
-        new_exp_list.append(class_rules_exp_tab)
+        new_exp_list.append(feature_importance_exp_tab)
         new_exp_val_list.append(3)
+    if 4 in exp_values_to_apply:
+        new_exp_list.append(class_rules_exp_tab)
+        new_exp_val_list.append(4)
 
     # Check the subtabs of the example explanation tab
-    if 5 in exp_values_to_apply:
-        new_examples_list.append(what_if_subtab)
-        new_exp_val_list.append(5)
     if 6 in exp_values_to_apply:
-        new_examples_list.append(why_not_subtab)
+        new_examples_list.append(what_if_subtab)
         new_exp_val_list.append(6)
     if 7 in exp_values_to_apply:
-        new_examples_list.append(when_subtab)
+        new_examples_list.append(why_not_subtab)
         new_exp_val_list.append(7)
+    if 8 in exp_values_to_apply:
+        new_examples_list.append(when_subtab)
+        new_exp_val_list.append(8)
     
-    # 4 should be checked in any case: add the explanation tab
-    if 4 in exp_values_to_apply:
+    # 5 should be checked in any case: add the explanation tab
+    if 5 in exp_values_to_apply:
         examples_tab_def = dbc.Tab([
                 html.P(" ", className='mt-3'),
                 dbc.Tabs(new_examples_list, id='example_subtabs')
@@ -880,7 +937,7 @@ def switch_to_dev_user_profile(dev_nc, user_nc, business_nc, regulatory_nc, affe
                 labelClassName='text-primary', tab_style={'font-weight': 'bold'})
 
         new_exp_list.append(examples_tab_def)
-        new_exp_val_list.append(4)
+        new_exp_val_list.append(5)
 
     new_exp_list.append(settings_tab)
     print("Tab valuess set to " + str(new_exp_val_list))
