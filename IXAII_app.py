@@ -161,40 +161,46 @@ starting_tab = dbc.Tab(
                 tab_style={'font-weight': 'bold'})
 
 
+# --- Data Information Tab -----------------------------------------------------------------------------
+data_info_tab = dbc.Tab([
+                    dbc.Tab([
+                        dbc.Card( dbc.CardBody([
+                            html.H4("These are all current inputs:",
+                                id='de_inputs_overview_title'),
+                            dbc.Tooltip("This list presents all considered input values which "
+                                            + "may also include sensor data that cannot be manually "
+                                            + "adjusted.",
+                                target='de_inputs_overview_title'),
+                            dbc.Table(id='de_inputs_overview_out', bordered=False,
+                                className='mt-4 table-hover'),
+
+                            html.H4("These are all possible outcomes:",
+                                id='de_outcome_overview_title'),
+                            dbc.Tooltip("Here, the output classes represent the three different "
+                                            + "cultivars the wine data was taken from.",
+                                target='de_outcome_overview_title'),
+                            dbc.Table(outcome_tabel_array, id='de_outcome_overview_out',
+                                bordered=False, className='mt-4 table-hover'),
+
+                            html.H4("These are prototypical inputs for each outcome:",
+                                id='de_prototypical_inputs_overview_title'),
+                            dbc.Tooltip("The presented values represent the average values "
+                                            + "of the training data for each outcome's feature.",
+                                target='de_prototypical_inputs_overview_title'),
+                            dbc.Table(outcome_prototype_table, id='de_prototypical_inputs_overview_out',
+                                bordered=False, className='mt-4 table-hover')
+                        ]), className='mt-3'),
+                    ], label="Information", labelClassName='text-primary')
+                ],
+                label="Data Information", id='data_info_tab_label',
+                labelClassName='text-primary', tab_style={'font-weight': 'bold'})
+
+
 # --- Data Exploration Tab -----------------------------------------------------------------------------
 data_exp_tab = dbc.Tab([
                     html.P("The Data Exploration provides information about the training data.",
                         className='mt-3'),
                     dbc.Tabs([
-                        # --- Info TAB ------------------------------------------------------------
-                        dbc.Tab([
-                            dbc.Card( dbc.CardBody([
-                                html.H4("These are all current inputs:",
-                                    id='de_inputs_overview_title'),
-                                dbc.Tooltip("This list presents all considered input values which "
-                                             + "may also include sensor data that cannot be manually "
-                                             + "adjusted.",
-                                    target='de_inputs_overview_title'),
-                                dbc.Table(id='de_inputs_overview_out', bordered=False,
-                                    className='mt-4 table-hover'),
-
-                                html.H4("These are all possible outcomes:",
-                                    id='de_outcome_overview_title'),
-                                dbc.Tooltip("Here, the output classes represent the three different "
-                                             + "cultivars the wine data was taken from.",
-                                    target='de_outcome_overview_title'),
-                                dbc.Table(outcome_tabel_array, id='de_outcome_overview_out',
-                                    bordered=False, className='mt-4 table-hover'),
-
-                                html.H4("These are prototypical inputs for each outcome:",
-                                    id='de_prototypical_inputs_overview_title'),
-                                dbc.Tooltip("The presented values represent the average values "
-                                             + "of the training data for each outcome's feature.",
-                                    target='de_prototypical_inputs_overview_title'),
-                                dbc.Table(outcome_prototype_table, id='de_prototypical_inputs_overview_out',
-                                    bordered=False, className='mt-4 table-hover')
-                            ]), className='mt-3'),
-                        ], label="Information", labelClassName='text-primary'),
                         # --- Histogram TAB -------------------------------------------------------
                         dbc.Tab([
                             dbc.Card( dbc.CardBody([
@@ -241,10 +247,10 @@ data_exp_tab = dbc.Tab([
                 labelClassName='text-primary', tab_style={'font-weight': 'bold'})
 
 
-# --- Why Explanation Tab ------------------------------------------------------------------------------
-why_exp_tab = dbc.Tab([
-                    html.P("Why Explanations give information about why the system derived the "
-                            + "current output from the given inputs.",
+# --- Feature Importance Explanation Tab ------------------------------------------------------------------------------
+feature_importance_exp_tab = dbc.Tab([
+                    html.P("Feature importance explanations give information about how much a influence a feature value "
+                           + "had in the system's decision.",
                         className='mt-3'),
                     dbc.Tabs([
                         # --- Global LIME TAB -----------------------------------------------------
@@ -303,11 +309,20 @@ why_exp_tab = dbc.Tab([
                                     target='why_shap_featureno_label')
                             ]), className='mt-3')
                         ], label="Local SHAP", labelClassName='text-primary'),
-                        # --- Anchor --------------------------------------------------------------
-                        dbc.Tab([
-                            dbc.Card( dbc.CardBody([
+                        # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+                    ], className='mt-3')
+                ],
+                label="Feature Importance", id='feature_importance_exp_tab_label',
+                labelClassName='text-primary', tab_style={'font-weight': 'bold'})
 
-                                # --- format method -------------------------------------
+
+# --- Class Rules (Anchor) Explanation Tab -----------------------------------------------------------------------------
+class_rules_exp_tab = dbc.Tab([
+                    html.P("Class rules present probable thresholds, i.e. if the presented rules are followed, the outcome "
+                           + "will likely remain the same.",
+                        className='mt-3'),
+                    dbc.Card( dbc.CardBody([
+                         # --- format method -------------------------------------
                                 html.Div([
                                     dbc.Label("Select a format method:",
                                         id='anchor_why_format_method_label'),
@@ -340,70 +355,98 @@ why_exp_tab = dbc.Tab([
                                 # --- output --------------------------------------------
                                 html.Div(anchor_table, id='anchor_why_out')
                             ]), className='mt-3')
-                        ], label="Anchor", labelClassName='text-primary'),
-                        # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-                    ], className='mt-3')
-                ],
-                label="Why", id='why_explanation_tab_label',
-                labelClassName='text-primary', tab_style={'font-weight': 'bold'})
+                    ], label="Class Rules", id='class_rules_exp_tab_label',
+                    labelClassName='text-primary', tab_style={'font-weight': 'bold'})
 
 
-# --- nWhy Explanation Tab -----------------------------------------------------------------------------
-nWhy_exp_tab = dbc.Tab([
-                    html.P("-Why Explanations give Information about which inputs were not relevant "
-                            + "to the current output.",
+
+## --- Similar Inputs = What If ------------------------------------------------------
+what_if_subtab = dbc.Tab([
+                    #html.P("What If Explanations display simulated outputs based on altered inputs.",
+                    #    className='mt-3'),
+                    html.P("Here, examples for similar inputs to your own are given.",
                         className='mt-3'),
                     dbc.Card( dbc.CardBody([
-                        dbc.InputGroup([
-                            dbc.InputGroupText("All below listed values have a mean SHAP value "
-                                                + "smaller than (or equal to):",
-                                               id='DEFAULT_nWHY_SHAP_CUTOFF_label'),
-                            dbc.Input(id='DEFAULT_nWHY_SHAP_CUTOFF_input',
-                                      placeholder=str(DEFAULT_nWHY_SHAP_CUTOFF),
-                                type='number', step='0.01', min='0.0', max='1.0')
-                        ], className='mt-3 mb-3'),
-                        dbc.Tooltip("This list is based on the SHAP values of the selected plottype "
-                                     + "below.",
-                            target='DEFAULT_nWHY_SHAP_CUTOFF_label'),
-                        html.Ol(id='nWhy_shap_out'),
+                        html.H4("Factual examples with DiCE:",
+                            id='what_if_heading_label'),
+                        dbc.Tooltip("Factual examples have similar inputs to your original values "
+                                    "so you can compare the outcomes.",
+                            target='what_if_heading_label'),
 
-                        html.Hr(),
-
-                        html.Img(id='nWhy_shap_figure', style={'width':'90%'}),
                         dbc.InputGroup([
-                            dbc.InputGroupText("Select the SHAP plot type:"),
-                            dbc.Select(options=['global_bar', 'local_bar'],
-                                       id='nWhy_shap_plottype_dropdown',
-                                value='global_bar')
-                        ]),
-                        dbc.InputGroup([
-                            dbc.InputGroupText("Select the number of features to include:",
-                                id='nWhy_shap_featureno_label'),
-                            dbc.Input(id='nWhy_shap_featureno_input',
-                                placeholder=str(DEFAULT_DISPLAY_COUNT), type='number',
-                                step='1', min='1', max=feature_count)
+                            dbc.InputGroupText("Number of factual examples to generate:",
+                                id='dice_what_if_no_label'),
+                            dbc.Input(id='dice_what_if_no_input',
+                                    placeholder=str(DEFAULT_DICE_EXAMPLE_COUNT),
+                                type='number', step='1', min='1', max=DEFAULT_DICE_MAX_EXAMPLE_COUNT)
                         ], className='mt-3'),
-                        dbc.Tooltip("This graph will present this number of the least important "
-                                     + "features. "
-                                     + "In contrast to LIME, this will not change the features' "
-                                     + "weights, just the extend of the graph.",
-                            target='nWhy_shap_featureno_label')
+                        dbc.Tooltip("Must be an integer 0 < x <= 5",
+                            target='dice_what_if_no_label'),
+
+                        dbc.InputGroup([
+                            dbc.InputGroupText("Define DiCE's threshold:",
+                                id="dice_what_if_threshold_label"),
+                            dbc.Input(id='dice_what_if_threshold_input',
+                                    placeholder=str(DEFAULT_DICE_TRESHOLD),
+                                type='number', step='0.1', min='0.0', max='1.0')
+                        ], className='mt-3'),
+                        dbc.Tooltip("Minimum threshold for counterfactuals target class probability. "
+                                    "Must be a value between 0.0 and 1.0",
+                            target='dice_what_if_threshold_label'),
+
+                        html.Div([
+                            dbc.Label("Select the features to vary:",
+                                id='dice_what_if_features_to_vary_label'),
+                            dbc.Checklist(
+                                options=dice_feature_variation_checkboxes,
+                                value=DEFAULT_DICE_FEATURES_TO_VARY,
+                                id="dice_what_if_features_to_vary_input",
+                                inline=True,
+                            ),
+                        ], className='mt-3'),
+                        dbc.Tooltip("The features for which different input values (from your "
+                                    "original input) should be considered. "
+                                    "Please select at least one.",
+                            target='dice_what_if_features_to_vary_label'),
+
+                        html.Div([
+                            dbc.Label("Select a format method:",
+                                id='dice_what_if_format_method_label'),
+                            dbc.RadioItems(
+                                options=[{'label': "Table", 'value': 0},
+                                        {'label': "Bar Plot", 'value': 1}],
+                                value=0,
+                                id="dice_what_if_format_method_input",
+                                inline=True,
+                            ),
+                        ], className='mt-3'),
+                        dbc.Tooltip("Choose if you want the examples displayed as a table or "
+                                    "as a bar plot.",
+                            target='dice_what_if_format_method_label'),
+
+                        dbc.Button("Generate Examples", id='dice_what_if_generation_button',
+                                type='submit', n_clicks=0,
+                            outline=True, color='primary', size='sm', className='mt-3 me-1'),
+
+                        html.Div(id='dice_what_if_out', className='mt-3')
                     ]), className='mt-3')
                 ],
-                label="-Why", id='nWhy_explanation_tab_label',
-                labelClassName='text-primary', tab_style={'font-weight': 'bold'})
+                label="Similar Inputs", id='what_if_explanation_tab_label', labelClassName='text-primary')
 
 
-# --- Why Not Explanation Tab --------------------------------------------------------------------------
-why_not_exp_tab = dbc.Tab([
-                    html.P("Why Not Explanations give information about why another possible outcome "
-                            + "was not derived w.r.t. derived outcome and the applied inputs.",
+## --- Other Classes = Why Not -----------------------------------------------------
+why_not_subtab = dbc.Tab([
+                    #html.P("Why Not Explanations give information about why another possible outcome "
+                    #        + "was not derived w.r.t. derived outcome and the applied inputs.",
+                    #    className='mt-3'),
+                    html.P("Here, example input values are presented that lead to different outcomes than "
+                           + "the current one.",
                         className='mt-3'),
                     dbc.Card( dbc.CardBody([
                         html.H4("Counterfactual examples with DiCE:",
                             id='why_not_heading_label'),
                         dbc.Tooltip("Counterfactual examples specifically have another outcome so "
-                                     + "you can compare the inputs to your original values.",
+                                    + "you can compare the inputs to your original values.",
                             target='why_not_heading_label'),
 
                         # --- example no ----------------------------------------------------------
@@ -411,7 +454,7 @@ why_not_exp_tab = dbc.Tab([
                             dbc.InputGroupText("Number of counterfactuals to generate:",
                                 id='dice_why_not_no_label'),
                             dbc.Input(id='dice_why_not_no_input',
-                                      placeholder=str(DEFAULT_DICE_EXAMPLE_COUNT),
+                                    placeholder=str(DEFAULT_DICE_EXAMPLE_COUNT),
                                 type='number', step='1', min='1', max=DEFAULT_DICE_MAX_EXAMPLE_COUNT)
                         ], className='mt-3'),
                         dbc.Tooltip("Must be an integer 0 < x <= 5",
@@ -422,7 +465,7 @@ why_not_exp_tab = dbc.Tab([
                             dbc.InputGroupText("Define DiCE's threshold:",
                                 id="dice_why_not_threshold_label"),
                             dbc.Input(id='dice_why_not_threshold_input',
-                                      placeholder=str(DEFAULT_DICE_TRESHOLD),
+                                    placeholder=str(DEFAULT_DICE_TRESHOLD),
                                 type='number', step='0.1', min='0.0', max='1.0')
                         ], className='mt-3'),
                         dbc.Tooltip("Minimum threshold for counterfactuals target class probability. "
@@ -451,7 +494,7 @@ why_not_exp_tab = dbc.Tab([
                                 id='dice_why_not_format_method_label'),
                             dbc.RadioItems(
                                 options=[{'label': "Table", 'value': 0},
-                                         {'label': "Bar Plot", 'value': 1}],
+                                        {'label': "Bar Plot", 'value': 1}],
                                 value=0,
                                 id="dice_why_not_format_method_input",
                                 inline=True,
@@ -463,7 +506,7 @@ why_not_exp_tab = dbc.Tab([
 
                         # --- generate ------------------------------------------------------------
                         dbc.Button("Generate Examples", id='dice_why_not_generation_button',
-                                   type='submit', n_clicks=0,
+                                type='submit', n_clicks=0,
                             outline=True, color='primary', size='sm', className='mt-3 me-1'),
 
                         # --- output --------------------------------------------------------------
@@ -471,166 +514,105 @@ why_not_exp_tab = dbc.Tab([
 
                     ]), className='mt-3')
                 ],
-                label="Why Not", id='why_not_explanation_tab_label',
-                labelClassName='text-primary', tab_style={'font-weight': 'bold'})
+                label="Other Classes", id='why_not_explanation_tab_label', labelClassName='text-primary')
 
 
-# --- What If Explanation Tab --------------------------------------------------------------------------
-what_if_exp_tab = dbc.Tab([
-                    html.P("What If Explanations display simulated outputs based on altered inputs.",
-                        className='mt-3'),
-                    dbc.Card( dbc.CardBody([
-                        html.H4("Factual examples with DiCE:",
-                            id='what_if_heading_label'),
-                        dbc.Tooltip("Factual examples have similar inputs to your original values "
-                                    "so you can compare the outcomes.",
-                            target='what_if_heading_label'),
+## --- When = Specific Classes ------------------------------------------------------------
+when_subtab = dbc.Tab([
+                #html.P("When Explanations display sumulated inputs based on a desired output.",
+                #    className='mt-3'),
+                html.P("Here, a target outcome can be specified in order to generate input values that "
+                       + "would lead to it.",
+                    className='mt-3'),
+                dbc.Card( dbc.CardBody([
+                    html.H4("Counter- and Semi-factual examples with DiCE:",
+                        id='when_heading_label'),
+                    dbc.Tooltip("Counterfactual / Semi-factual examples specifically have "
+                                "another / the same outcome so you can "
+                                "compare the inputs to your original values.",
+                        target='when_heading_label'),
 
-                        dbc.InputGroup([
-                            dbc.InputGroupText("Number of factual examples to generate:",
-                                id='dice_what_if_no_label'),
-                            dbc.Input(id='dice_what_if_no_input',
-                                      placeholder=str(DEFAULT_DICE_EXAMPLE_COUNT),
-                                type='number', step='1', min='1', max=DEFAULT_DICE_MAX_EXAMPLE_COUNT)
-                        ], className='mt-3'),
-                        dbc.Tooltip("Must be an integer 0 < x <= 5",
-                            target='dice_what_if_no_label'),
+                    dbc.InputGroup([
+                        dbc.InputGroupText("Target class:",
+                            id='dice_when_target_class_label'),
+                        dbc.Input(id='dice_when_target_class_input', type='number',
+                            step='1', min='0', max=len(target_list)-1)
+                    ], className='mt-3'),
+                    dbc.Tooltip("Which outcome should the generated examples have? 0, 1, or 2?",
+                        target='dice_when_target_class_label'),
 
-                        dbc.InputGroup([
-                            dbc.InputGroupText("Define DiCE's threshold:",
-                                id="dice_what_if_threshold_label"),
-                            dbc.Input(id='dice_what_if_threshold_input',
-                                      placeholder=str(DEFAULT_DICE_TRESHOLD),
-                                type='number', step='0.1', min='0.0', max='1.0')
-                        ], className='mt-3'),
-                        dbc.Tooltip("Minimum threshold for counterfactuals target class probability. "
-                                    "Must be a value between 0.0 and 1.0",
-                            target='dice_what_if_threshold_label'),
+                    dbc.InputGroup([
+                        dbc.InputGroupText("Number of examples to generate:",
+                            id='dice_when_no_label'),
+                        dbc.Input(id='dice_when_no_input',
+                                placeholder=str(DEFAULT_DICE_EXAMPLE_COUNT),
+                            type='number', step='1', min='1', max=DEFAULT_DICE_MAX_EXAMPLE_COUNT)
+                    ], className='mt-3'),
+                    dbc.Tooltip("Must be an integer 0 < x <= 5",
+                        target='dice_when_no_label'),
 
-                        html.Div([
-                            dbc.Label("Select the features to vary:",
-                                id='dice_what_if_features_to_vary_label'),
-                            dbc.Checklist(
-                                options=dice_feature_variation_checkboxes,
-                                value=DEFAULT_DICE_FEATURES_TO_VARY,
-                                id="dice_what_if_features_to_vary_input",
-                                inline=True,
-                            ),
-                        ], className='mt-3'),
-                        dbc.Tooltip("The features for which different input values (from your "
-                                    "original input) should be considered. "
-                                    "Please select at least one.",
-                            target='dice_what_if_features_to_vary_label'),
+                    dbc.InputGroup([
+                        dbc.InputGroupText("Define DiCE's threshold:",
+                            id="dice_when_threshold_label"),
+                        dbc.Input(id='dice_when_threshold_input',
+                                placeholder=str(DEFAULT_DICE_TRESHOLD),
+                            type='number', step='0.1', min='0.0', max='1.0')
+                    ], className='mt-3'),
+                    dbc.Tooltip("Minimum threshold for counterfactuals target class probability. "
+                                "Must be a value between 0.0 and 1.0",
+                        target='dice_when_threshold_label'),
 
-                        html.Div([
-                            dbc.Label("Select a format method:",
-                                id='dice_what_if_format_method_label'),
-                            dbc.RadioItems(
-                                options=[{'label': "Table", 'value': 0},
-                                         {'label': "Bar Plot", 'value': 1}],
-                                value=0,
-                                id="dice_what_if_format_method_input",
-                                inline=True,
-                            ),
-                        ], className='mt-3'),
-                        dbc.Tooltip("Choose if you want the examples displayed as a table or "
-                                    "as a bar plot.",
-                            target='dice_what_if_format_method_label'),
+                    html.Div([
+                        dbc.Label("Select the features to vary:",
+                            id='dice_features_to_vary_label'),
+                        dbc.Checklist(
+                            options=dice_feature_variation_checkboxes,
+                            value=DEFAULT_DICE_FEATURES_TO_VARY,
+                            id="dice_when_features_to_vary_input",
+                            inline=True,
+                        ),
+                    ], className='mt-3'),
+                    dbc.Tooltip("The features for which different input values (from your "
+                                "original input) should be considered. "
+                                "Please select at least one.",
+                        target='dice_features_to_vary_label'),
 
-                        dbc.Button("Generate Examples", id='dice_what_if_generation_button',
-                                   type='submit', n_clicks=0,
-                            outline=True, color='primary', size='sm', className='mt-3 me-1'),
+                    # --- format method -------------------------------------------------------
+                    html.Div([
+                        dbc.Label("Select a format method:",
+                            id='dice_when_format_method_label'),
+                        dbc.RadioItems(
+                            options=[{'label': "Table", 'value': 0},
+                                    {'label': "Bar Plot", 'value': 1}],
+                            value=0,
+                            id="dice_when_format_method_input",
+                            inline=True,
+                        ),
+                    ], className='mt-3'),
+                    dbc.Tooltip("Choose if you want the examples displayed as a table or "
+                                "as a bar plot.",
+                        target='dice_when_format_method_label'),
 
-                        html.Div(id='dice_what_if_out', className='mt-3')
-                    ]), className='mt-3')
-                ],
-                label="What If", id='what_if_explanation_tab_label',
-                labelClassName='text-primary', tab_style={'font-weight': 'bold'})
+                    dbc.Button("Generate Examples", id='dice_when_generation_button',
+                            type='submit', n_clicks=0,
+                        outline=True, color='primary', size='sm', className='mt-3 me-1'),
+
+                    html.Div(id='dice_when_out', className='mt-3')
+
+                ]), className='mt-3')
+            ],
+            label="Specific Classes", id='when_explanation_tab_label', labelClassName='text-primary')
 
 
-# --- When Explanation Tab -----------------------------------------------------------------------------
-when_exp_tab = dbc.Tab([
-                    html.P("When Explanations display sumulated inputs based on a desired output.",
-                        className='mt-3'),
-                    dbc.Card( dbc.CardBody([
-                        html.H4("Counter- and Semi-factual examples with DiCE:",
-                            id='when_heading_label'),
-                        dbc.Tooltip("Counterfactual / Semi-factual examples specifically have "
-                                    "another / the same outcome so you can "
-                                    "compare the inputs to your original values.",
-                            target='when_heading_label'),
 
-                        dbc.InputGroup([
-                            dbc.InputGroupText("Target class:",
-                                id='dice_when_target_class_label'),
-                            dbc.Input(id='dice_when_target_class_input', type='number',
-                                step='1', min='0', max=len(target_list)-1)
-                        ], className='mt-3'),
-                        dbc.Tooltip("Which outcome should the generated examples have? 0, 1, or 2?",
-                            target='dice_when_target_class_label'),
-
-                        dbc.InputGroup([
-                            dbc.InputGroupText("Number of examples to generate:",
-                                id='dice_when_no_label'),
-                            dbc.Input(id='dice_when_no_input',
-                                      placeholder=str(DEFAULT_DICE_EXAMPLE_COUNT),
-                                type='number', step='1', min='1', max=DEFAULT_DICE_MAX_EXAMPLE_COUNT)
-                        ], className='mt-3'),
-                        dbc.Tooltip("Must be an integer 0 < x <= 5",
-                            target='dice_when_no_label'),
-
-                        dbc.InputGroup([
-                            dbc.InputGroupText("Define DiCE's threshold:",
-                                id="dice_when_threshold_label"),
-                            dbc.Input(id='dice_when_threshold_input',
-                                      placeholder=str(DEFAULT_DICE_TRESHOLD),
-                                type='number', step='0.1', min='0.0', max='1.0')
-                        ], className='mt-3'),
-                        dbc.Tooltip("Minimum threshold for counterfactuals target class probability. "
-                                    "Must be a value between 0.0 and 1.0",
-                            target='dice_when_threshold_label'),
-
-                        html.Div([
-                            dbc.Label("Select the features to vary:",
-                                id='dice_features_to_vary_label'),
-                            dbc.Checklist(
-                                options=dice_feature_variation_checkboxes,
-                                value=DEFAULT_DICE_FEATURES_TO_VARY,
-                                id="dice_when_features_to_vary_input",
-                                inline=True,
-                            ),
-                        ], className='mt-3'),
-                        dbc.Tooltip("The features for which different input values (from your "
-                                    "original input) should be considered. "
-                                    "Please select at least one.",
-                            target='dice_features_to_vary_label'),
-
-                        # --- format method -------------------------------------------------------
-                        html.Div([
-                            dbc.Label("Select a format method:",
-                                id='dice_when_format_method_label'),
-                            dbc.RadioItems(
-                                options=[{'label': "Table", 'value': 0},
-                                         {'label': "Bar Plot", 'value': 1}],
-                                value=0,
-                                id="dice_when_format_method_input",
-                                inline=True,
-                            ),
-                        ], className='mt-3'),
-                        dbc.Tooltip("Choose if you want the examples displayed as a table or "
-                                    "as a bar plot.",
-                            target='dice_when_format_method_label'),
-
-                        dbc.Button("Generate Examples", id='dice_when_generation_button',
-                                   type='submit', n_clicks=0,
-                            outline=True, color='primary', size='sm', className='mt-3 me-1'),
-
-                        html.Div(id='dice_when_out', className='mt-3')
-
-                    ]), className='mt-3')
-                ],
-                label="When", id='when_explanation_tab_label',
-                labelClassName='text-primary', tab_style={'font-weight': 'bold'})
+# --- Example-based Explanation Tab ------------------------------------------------------------------------------
+#example_exp_tab = dbc.Tab([
+#                    html.P("TODO",
+#                        className='mt-3'),
+#                    dbc.Tabs([ ], id='example_subtabs')
+#                ],
+#                label="Examples", id='example_exp_tab_label',
+#                labelClassName='text-primary', tab_style={'font-weight': 'bold'})
 
 
 # --- Settings Tab -------------------------------------------------------------------------------------
@@ -641,12 +623,14 @@ settings_tab = dbc.Tab(
                                 dbc.Label("Please select the explanation types to display:"),
                                 dbc.Checklist(
                                     options=[
+                                        {"label": "Data Information", "value": 0},
                                         {"label": "Data Exploration", "value": 1},
-                                        {"label": "Why", "value": 2},
-                                        {"label": "-Why", "value": 3},
-                                        {"label": "Why Not", "value": 4},
-                                        {"label": "What If", "value": 5},
-                                        {"label": "When", "value": 6}
+                                        {"label": "Feature Importance", "value": 2},
+                                        {"label": "Class Rules", "value": 3},
+                                        {"label": "Examples", "value": 4},
+                                        {"label": "Examples - Similar Inputs", "value": 5},
+                                        {"label": "Examples - Other Classes", "value": 6},
+                                        {"label": "Examples - Specific Classes", "value": 7}
                                     ],
                                     value=[], id="explanations_toggle_input",
                                 ),
@@ -663,20 +647,25 @@ settings_tab = dbc.Tab(
 #  User Profile Definitions
 #############################################################################################################
 
-dev_user_profile_values = [1, 2, 3, 6] # Data Exploration, Why, nWhy, and When
-dev_user_profile_list = [ data_exp_tab, why_exp_tab, nWhy_exp_tab, when_exp_tab, settings_tab ]
+dev_user_profile_values = [0, 1, 2, 3, 4, 5, 6, 7] # Data Info, Data Exploration, Feature Importance, Class Rules, and Examples
+#dev_user_profile_list = [data_info_tab, data_exp_tab, feature_importance_exp_tab, class_rules_exp_tab, settings_tab ]
+#dev_user_examples_list = [what_if_subtab, why_not_subtab, when_subtab]
 
-user_user_profile_vlaues = [2, 3, 4, 5]   # Why, nWhy, Why Not, and What If
-user_user_profile_list = [ why_exp_tab, nWhy_exp_tab, why_not_exp_tab, what_if_exp_tab, settings_tab ]
+user_user_profile_vlaues = [0, 2, 4, 5, 6]   # Data Info, Feature Importance, and Examples
+#user_user_profile_list = [data_info_tab, feature_importance_exp_tab, settings_tab ]
+#user_user_examples_list = [what_if_subtab, why_not_subtab]
 
-business_user_profile_vlaues = [2, 4, 5, 6]  # Why, Why Not, What If, and When
-business_user_profile_list = [ why_exp_tab, why_not_exp_tab, what_if_exp_tab, when_exp_tab, settings_tab ]
+business_user_profile_vlaues = [0, 2, 4, 5, 6]   # Data Info, Feature Importance, and Examples
+#business_user_profile_list = [data_info_tab, feature_importance_exp_tab, settings_tab ]
+#business_user_examples_list = [what_if_subtab, why_not_subtab]
 
-regulatory_user_profile_vlaues = [1, 2, 4, 6]  # Data Exploration, Why, Why Not, When
-regulatory_user_profile_list = [ data_exp_tab, why_exp_tab, why_not_exp_tab, when_exp_tab, settings_tab ]
+regulatory_user_profile_vlaues = [0, 1, 2, 4, 7]  # Data Info, Data Exploration, Feature Importance, and Examples
+#regulatory_user_profile_list = [data_info_tab, data_exp_tab, feature_importance_exp_tab, settings_tab ]
+#regulatory_user_examples_list = [when_subtab]
 
-affected_user_profile_vlaues = [2, 4, 5]  # Why, Why Not, What If
-affected_user_profile_list = [ why_exp_tab, why_not_exp_tab, what_if_exp_tab, settings_tab ]
+affected_user_profile_vlaues = [0, 2, 4, 5, 6]  # Data Info, Feature Importance, and Examples
+#affected_user_profile_list = [data_info_tab, feature_importance_exp_tab, settings_tab ]
+#affected_user_examples_list = [what_if_subtab, why_not_subtab]
 
 
 
@@ -802,7 +791,7 @@ app.layout = dbc.Container([
 
         dbc.Col([
             html.Div([
-                dbc.Tabs([ starting_tab, settings_tab ], id='explanation_tabs')
+                dbc.Tabs([starting_tab, settings_tab], id='explanation_tabs')
             ])
         ], width={"size": 8, "order": 2, "offset": 1})
     ])
@@ -835,42 +824,66 @@ app.layout = dbc.Container([
 )
 def switch_to_dev_user_profile(dev_nc, user_nc, business_nc, regulatory_nc, affected_nc, exp_toggle_values):
     profile_id = ctx.triggered_id
+    exp_values_to_apply = []
     match profile_id:
         case 'dropdown_up_dev_input':
-            return dev_user_profile_list, dev_user_profile_values
+            exp_values_to_apply = dev_user_profile_values
         case 'dropdown_up_user_input':
-            return user_user_profile_list, user_user_profile_vlaues
+            exp_values_to_apply = user_user_profile_vlaues
         case 'dropdown_up_business_input':
-            return business_user_profile_list, business_user_profile_vlaues
+            exp_values_to_apply = business_user_profile_vlaues
         case 'dropdown_up_regulatory_input':
-            return regulatory_user_profile_list, regulatory_user_profile_vlaues
+            exp_values_to_apply = regulatory_user_profile_vlaues
         case 'dropdown_up_affected_input':
-            return affected_user_profile_list, affected_user_profile_vlaues
+            exp_values_to_apply = affected_user_profile_vlaues
         case 'explanations_toggle_input':
-            new_exp_list = []
-            new_exp_val_list = []
-            if 1 in exp_toggle_values:
-                new_exp_list.append(data_exp_tab)
-                new_exp_val_list.append(1)
-            if 2 in exp_toggle_values:
-                new_exp_list.append(why_exp_tab)
-                new_exp_val_list.append(2)
-            if 3 in exp_toggle_values:
-                new_exp_list.append(nWhy_exp_tab)
-                new_exp_val_list.append(3)
-            if 4 in exp_toggle_values:
-                new_exp_list.append(why_not_exp_tab)
-                new_exp_val_list.append(4)
-            if 5 in exp_toggle_values:
-                new_exp_list.append(what_if_exp_tab)
-                new_exp_val_list.append(5)
-            if 6 in exp_toggle_values:
-                new_exp_list.append(when_exp_tab)
-                new_exp_val_list.append(6)
-            new_exp_list.append(settings_tab)
-            return new_exp_list, new_exp_val_list
+            exp_values_to_apply = exp_toggle_values
         case _:
             return [starting_tab, settings_tab], []
+
+    new_exp_list = []
+    new_examples_list = []
+    new_exp_val_list = []
+
+    # Check the normal explanation tabs
+    if 0 in exp_values_to_apply:
+        new_exp_list.append(data_info_tab)
+        new_exp_val_list.append(0)
+    if 1 in exp_values_to_apply:
+        new_exp_list.append(data_exp_tab)
+        new_exp_val_list.append(1)
+    if 2 in exp_values_to_apply:
+        new_exp_list.append(feature_importance_exp_tab)
+        new_exp_val_list.append(2)
+    if 3 in exp_values_to_apply:
+        new_exp_list.append(class_rules_exp_tab)
+        new_exp_val_list.append(3)
+
+    # Check the subtabs of the example explanation tab
+    if 5 in exp_values_to_apply:
+        new_examples_list.append(what_if_subtab)
+        new_exp_val_list.append(5)
+    if 6 in exp_values_to_apply:
+        new_examples_list.append(why_not_subtab)
+        new_exp_val_list.append(6)
+    if 7 in exp_values_to_apply:
+        new_examples_list.append(when_subtab)
+        new_exp_val_list.append(7)
+    
+    # 4 should be checked in any case: add the explanation tab
+    if 4 in exp_values_to_apply:
+        examples_tab_def = dbc.Tab([
+                dbc.Tabs(new_examples_list, id='example_subtabs')
+                ],
+                label="Examples", id='example_exp_tab_label',
+                labelClassName='text-primary', tab_style={'font-weight': 'bold'})
+
+        new_exp_list.append(examples_tab_def)
+        new_exp_val_list.append(4)
+
+    new_exp_list.append(settings_tab)
+    print("Tab valuess set to " + str(new_exp_val_list))
+    return new_exp_list, new_exp_val_list
 
 
 # --- Predict --------------------------------------------------------------------------------
@@ -1033,74 +1046,6 @@ def update_why_shapplot(n_clicks, plottype, feature_no_int):
     fig_bar_matplotlib = f'data:image/png;base64,{fig_data}'
 
     return html.Img(src=fig_bar_matplotlib, style={'width':'90%'})
-
-
-# --- nWhy SHAP Plots -----------------------------------------------------------------------------
-@app.callback(
-    Output(component_id='nWhy_shap_out', component_property='children'),
-    Output(component_id='nWhy_shap_figure', component_property='src'), 
-    [   Input(component_id='predict_button', component_property='n_clicks'),
-        Input(component_id='DEFAULT_nWHY_SHAP_CUTOFF_input', component_property='value'),
-        Input(component_id='nWhy_shap_plottype_dropdown', component_property='value'),
-        Input(component_id='nWhy_shap_featureno_input', component_property='value')
-    ])
-def update_nWhy_shapplot(n_clicks, cutoff, plottype, feature_no_int):
-    global DEFAULT_nWHY_SHAP_CUTOFF
-    if cutoff != None and float(cutoff) >= 0.0 and float(cutoff) <= 1.0:
-        DEFAULT_nWHY_SHAP_CUTOFF = float(cutoff) 
-    else:
-        DEFAULT_nWHY_SHAP_CUTOFF = DEFAULT_nWHY_SHAP_CUTOFF
-
-    if feature_no_int != None and int(feature_no_int) > 0 and int(feature_no_int) <= feature_count:
-        max_features = int(feature_no_int)
-    else:
-        max_features = DEFAULT_DISPLAY_COUNT
-
-    # Get the SHAP values
-    shap_values_to_use = global_shap_values
-    if plottype == 'local_bar':
-        local_shap_values = shap_explainer(current_input_vals)
-        local_shap_values = shap.Explanation(values=local_shap_values.values,
-                                             base_values=local_shap_values.base_values, 
-                                             data=local_shap_values.data,
-                                             feature_names=feature_list)
-        shap_values_to_use = local_shap_values
-
-    # Order the features after their min shap value
-    # TODO: Fix the order for the global plot (which seems not to be sorted correctly)
-    agsv = np.abs(shap_values_to_use.values[0])
-    df_sort = pd.DataFrame({'features': feature_list, 'shap vals': agsv})
-    df_sort = df_sort.sort_values('shap vals')
-    features_list = df_sort['features'].values
-    col2num = {col: i for i, col in enumerate(feature_list)}
-    order = list(map(col2num.get, features_list))
-
-    # Get least influental features as list elements
-    list_elements = []
-    for i in range(len(features_list)):
-        if  df_sort['shap vals'].values[i] <= DEFAULT_nWHY_SHAP_CUTOFF:
-            li = html.Li(features_list[i])
-            list_elements.append(li)
-    if len(list_elements) == 0:
-        list_elements.append(html.Li(" - "))
-    
-    # Build the matplotlib figure
-    fig = plt.figure(figsize=(10, 5))
-    match plottype:
-        case 'global_bar':
-            shap.plots.bar(shap_values_to_use, max_display=max_features, order=order, show=False)
-        case 'local_bar':
-            shap.plots.bar(shap_values_to_use[0], max_display=max_features, order=order, show=False)
-    
-    # Save the figure to a temporary buffer
-    buf = BytesIO()
-    fig.savefig(buf, bbox_inches='tight', format="png")
-
-    # Embed the result in the html output
-    fig_data = base64.b64encode(buf.getbuffer()).decode("ascii")
-    fig_bar_matplotlib = f'data:image/png;base64,{fig_data}'
-
-    return list_elements, fig_bar_matplotlib
 
 
 # --- Why Local LIME Plots ------------------------------------------------------------------------
