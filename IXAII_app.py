@@ -53,7 +53,7 @@ feature_ranges = [ [3.0, 9.0], [1.0, 6.0], [0.0, 8.0], [0.0, 4.0]]
 
 
 
-# 1) Load Data =========================================================================================
+# 1.0) Load Data =======================================================================================
 dataset = datasets.load_iris()
 feature_list = dataset.feature_names
 feature_count = len(feature_list)
@@ -69,7 +69,7 @@ target_list, outcome_tabel_array = IXAII_functions.get_outcomes(target_names)
 dataset_df, X_df = IXAII_functions.get_data_df(dataset, feature_list)
 
 
-# 3) Get prototypical inputs ==========================================================================
+# 3) Get prototypical inputs ===========================================================================
 (data_row_count, data_col_count) = dataset_df.shape
 avg_feauture_values = IXAII_functions.get_avg_input_set(dataset_df, data_row_count)
 outcome_prototype_table = IXAII_functions.get_prototypical_input_sets(dataset_df, target_names, feature_list)
@@ -78,7 +78,6 @@ outcome_prototype_table = IXAII_functions.get_prototypical_input_sets(dataset_df
 X_train, X_test, y_train, y_test = model_selection.train_test_split(dataset.data, dataset.target,
                                                                     test_size=0.1, random_state=0)
 
-# NOTE: Using XGBClassifier does not work in combination with SHAP here!
 model = IXAII_functions.get_model(ML_METHOD)
 model.fit(X_train, y_train)
 
@@ -97,16 +96,16 @@ anchor_explainer = IXAII_functions.get_achnor_explainer(X_df.to_numpy(), feature
 dice_explainer = IXAII_functions.get_dice_explainer(ML_METHOD, model, dataset_df, feature_list)
 
 
-# 4.1) Get global SHAP importance values ---------------------------------------------------------------
+# 5.1) Get global SHAP importance values ---------------------------------------------------------------
 global_shap_values, global_shap_importance_df = IXAII_functions.get_global_shap_values(shap_explainer, X_df,
                                                                              X_train, feature_list)
 
 
-# 4.2) Add LIME weights for global representation ------------------------------------------------------
+# 5.2) Add LIME weights for global representation ------------------------------------------------------
 lime_importance_df = IXAII_functions.get_lime_values(lime_explainer, model, X_train, feature_list)
 
 
-# 4.3) Add both global values into a Plotly plot -------------------------------------------------------
+# 5.3) Add both global values into a Plotly plot -------------------------------------------------------
 global_importance_figure = IXAII_functions.get_global_importance_plot(global_shap_importance_df, lime_importance_df)
 
 # -> Modify the tickangle of the xaxis, resulting in rotated labels
@@ -114,7 +113,7 @@ global_importance_figure.update_layout(barmode='group', legend_title_text = "Ave
                                        xaxis_tickangle=-45)
 
 
-# 4.4) Get the Anchors prediction ----------------------------------------------------------------------
+# 5.4) Get the Anchors prediction ----------------------------------------------------------------------
 # TODO: Not sure if this works with MLPReg model
 anchor_explanation = anchor_explainer.explain_instance(np.array(avg_feauture_values),
                                                 model.predict, threshold=DEFAULT_ANCHOR_THRESHOLD)
@@ -124,7 +123,7 @@ anchor_table = dbc.Table( [ html.Tbody(rule_table_list, id='anchor_rule_tablebod
                           bordered=False)
 
 
-# 4.5) Prepare DiCE feature variation input checkboxes -------------------------------------------
+# 5.5) Prepare DiCE feature variation input checkboxes -------------------------------------------
 dice_feature_variation_checkboxes = IXAII_functions.get_dice_varying_features_checkboxes(feature_list)
 
 
@@ -161,18 +160,14 @@ starting_tab = dbc.Tab(
                 tab_style={'font-weight': 'bold'})
 
 
-# --- Guide Tab -----------------------------------------------------------------------------
+# --- Guide Tab ----------------------------------------------------------------------------------------
 guide_tab = dbc.Tab([
                 html.P("This guide provides some example questions that point you to the explanation "
                        + "which can be used to answer them!",
                         className='mt-3'),
                 dbc.Card( dbc.CardBody([
                     html.H4("Feature Importance:"),
-                    dbc.Table([
-                                # Header
-                                #html.Thead(html.Tr([html.Th("Column 1"), html.Th("Column 2")])),
-                                # Body
-                                html.Tbody([
+                    dbc.Table([ html.Tbody([
                                     html.Tr([html.Td("Which features consistently drive the model’s predictions across a group of instances?"),
                                              html.Td("Global LIME or SHAP plots")]),
                                     html.Tr([html.Td("Which features were most influential for this particular prediction?"), 
@@ -182,9 +177,6 @@ guide_tab = dbc.Tab([
                                 ])
                             ],
                             bordered=False, className='mt-4 table-hover'),
-                        # Which features were most influential for this particular prediction? -> Local LIME or SHAP plots
-                        # Why did this instance receive a positive (or negative) outcome? -> Local SHAP waterfall plot
-                        # Which features consistently drive the model’s predictions across a group of instances? -> Global LIME or SHAP plots
 
                     html.H4("Class Rules:"),
                     dbc.Table([ html.Tbody([
@@ -193,9 +185,6 @@ guide_tab = dbc.Tab([
                                 ])
                             ],
                             bordered=False, className='mt-4 table-hover'),
-                        # What combination of feature conditions guarantees this outcome with high confidence?
-                        # If I slightly change certain feature values, does the prediction remain the same or switch to another class?
-                        # --> Could also be answered by Examples - Similar Inputs
                     
                     html.H4("Examples"),
                     dbc.Table([ html.Tbody([
@@ -206,8 +195,6 @@ guide_tab = dbc.Tab([
                                 ])
                             ],
                             bordered=False, className='mt-4 table-hover'),
-                        # What are some plausible examples that would lead to a different predicted outcome? -> Other Classes
-                        # How do feature values need to change in order to receive a particular outcome? -> Specific Classes
                     ]), className='mt-3')
                 ],
                 label="Guide", id='guide_tab_label',
@@ -281,7 +268,7 @@ data_exp_tab = dbc.Tab([
                                 ], className='mt-3')
                             ]), className='mt-3'),
                         ], label="Box Plot", labelClassName='text-primary'),
-                        # --- Scatterplot TAB --------------------------------------
+                        # --- Scatterplot TAB -----------------------------------------------------
                         dbc.Tab([
                             dbc.Card( dbc.CardBody([
                                 dcc.Graph(figure={}, id='de_scatterplot_graph'),
@@ -300,7 +287,7 @@ data_exp_tab = dbc.Tab([
                 labelClassName='text-primary', tab_style={'font-weight': 'bold'})
 
 
-# --- Feature Importance Explanation Tab ------------------------------------------------------------------------------
+# --- Feature Importance Explanation Tab ---------------------------------------------------------------
 feature_importance_exp_tab = dbc.Tab([
                     html.P("Feature importance explanations give information about how much a influence a feature value "
                            + "had in the system's decision.",
@@ -369,13 +356,13 @@ feature_importance_exp_tab = dbc.Tab([
                 labelClassName='text-primary', tab_style={'font-weight': 'bold'})
 
 
-# --- Class Rules (Anchor) Explanation Tab -----------------------------------------------------------------------------
+# --- Class Rules (Anchor) Explanation Tab -------------------------------------------------------------
 class_rules_exp_tab = dbc.Tab([
                     html.P("Class rules present probable thresholds, i.e. if the presented rules are followed, the outcome "
                            + "will likely remain the same.",
                         className='mt-3'),
                     dbc.Card( dbc.CardBody([
-                         # --- format method -------------------------------------
+                         # --- Format method ------------------------------------------------------
                                 html.Div([
                                     dbc.Label("Select a format method:",
                                         id='anchor_why_format_method_label'),
@@ -391,7 +378,7 @@ class_rules_exp_tab = dbc.Tab([
                                             "as a box plot.",
                                     target='anchor_why_format_method_label'),
 
-                                # --- treshld -------------------------------------------
+                                # --- Treshld -----------------------------------------------------
                                 dbc.InputGroup([
                                     dbc.InputGroupText("Select Anchor's threshold:",
                                         id='anchor_threshold_label'),
@@ -405,15 +392,14 @@ class_rules_exp_tab = dbc.Tab([
                                              + "prediction at least x percent of the time.",
                                     target='anchor_threshold_label'),
                                     
-                                # --- output --------------------------------------------
+                                # --- Output ------------------------------------------------------
                                 html.Div(anchor_table, id='anchor_why_out')
                             ]), className='mt-3')
                     ], label="Class Rules", id='class_rules_exp_tab_label',
                     labelClassName='text-primary', tab_style={'font-weight': 'bold'})
 
 
-
-## --- Similar Inputs = What If ------------------------------------------------------
+## --- Similar Inputs = What If ------------------------------------------------------------------------
 what_if_subtab = dbc.Tab([
                     #html.P("What If Explanations display simulated outputs based on altered inputs.",
                     #    className='mt-3'),
@@ -487,7 +473,7 @@ what_if_subtab = dbc.Tab([
                 label="Similar Inputs", id='what_if_explanation_tab_label', labelClassName='text-primary')
 
 
-## --- Other Classes = Why Not -----------------------------------------------------
+## --- Other Classes = Why Not -------------------------------------------------------------------------
 why_not_subtab = dbc.Tab([
                     #html.P("Why Not Explanations give information about why another possible outcome "
                     #        + "was not derived w.r.t. derived outcome and the applied inputs.",
@@ -502,7 +488,7 @@ why_not_subtab = dbc.Tab([
                                     + "you can compare the inputs to your original values.",
                             target='why_not_heading_label'),
 
-                        # --- example no ----------------------------------------------------------
+                        # --- Example no ----------------------------------------------------------
                         dbc.InputGroup([
                             dbc.InputGroupText("Number of counterfactuals to generate:",
                                 id='dice_why_not_no_label'),
@@ -513,7 +499,7 @@ why_not_subtab = dbc.Tab([
                         dbc.Tooltip("Must be an integer 0 < x <= 5",
                             target='dice_why_not_no_label'),
 
-                        # --- treshold ------------------------------------------------------------
+                        # --- Treshold ------------------------------------------------------------
                         dbc.InputGroup([
                             dbc.InputGroupText("Define DiCE's threshold:",
                                 id="dice_why_not_threshold_label"),
@@ -525,7 +511,7 @@ why_not_subtab = dbc.Tab([
                                     "Must be a value between 0.0 and 1.0",
                             target='dice_why_not_threshold_label'),
 
-                        # --- features to vary ----------------------------------------------------
+                        # --- Features to vary ----------------------------------------------------
                         html.Div([
                             dbc.Label("Select the features to vary:",
                                 id='dice_why_not_features_to_vary_label'),
@@ -541,7 +527,7 @@ why_not_subtab = dbc.Tab([
                                     "Please select at least one.",
                             target='dice_why_not_features_to_vary_label'),
 
-                        # --- format method -------------------------------------------------------
+                        # --- Format method -------------------------------------------------------
                         html.Div([
                             dbc.Label("Select a format method:",
                                 id='dice_why_not_format_method_label'),
@@ -557,12 +543,12 @@ why_not_subtab = dbc.Tab([
                                     "as a bar plot.",
                             target='dice_why_not_format_method_label'),
 
-                        # --- generate ------------------------------------------------------------
+                        # --- Generate ------------------------------------------------------------
                         dbc.Button("Generate Examples", id='dice_why_not_generation_button',
                                 type='submit', n_clicks=0,
                             outline=True, color='primary', size='sm', className='mt-3 me-1'),
 
-                        # --- output --------------------------------------------------------------
+                        # --- Output --------------------------------------------------------------
                         html.Div(id='dice_why_not_out', className='mt-3')
 
                     ]), className='mt-3')
@@ -570,7 +556,7 @@ why_not_subtab = dbc.Tab([
                 label="Other Classes", id='why_not_explanation_tab_label', labelClassName='text-primary')
 
 
-## --- When = Specific Classes ------------------------------------------------------------
+## --- When = Specific Classes -------------------------------------------------------------------------
 when_subtab = dbc.Tab([
                 #html.P("When Explanations display sumulated inputs based on a desired output.",
                 #    className='mt-3'),
@@ -630,7 +616,7 @@ when_subtab = dbc.Tab([
                                 "Please select at least one.",
                         target='dice_features_to_vary_label'),
 
-                    # --- format method -------------------------------------------------------
+                    # --- Format method -------------------------------------------------------
                     html.Div([
                         dbc.Label("Select a format method:",
                             id='dice_when_format_method_label'),
@@ -655,17 +641,6 @@ when_subtab = dbc.Tab([
                 ]), className='mt-3')
             ],
             label="Specific Classes", id='when_explanation_tab_label', labelClassName='text-primary')
-
-
-
-# --- Example-based Explanation Tab ------------------------------------------------------------------------------
-#example_exp_tab = dbc.Tab([
-#                    html.P("TODO",
-#                        className='mt-3'),
-#                    dbc.Tabs([ ], id='example_subtabs')
-#                ],
-#                label="Examples", id='example_exp_tab_label',
-#                labelClassName='text-primary', tab_style={'font-weight': 'bold'})
 
 
 # --- Settings Tab -------------------------------------------------------------------------------------
@@ -701,25 +676,20 @@ settings_tab = dbc.Tab(
 #  User Profile Definitions
 #############################################################################################################
 
-dev_user_profile_values = [1, 2, 3, 4, 5, 6, 7, 8] # Data Info, Data Exploration, Feature Importance, Class Rules, and Examples
-#dev_user_profile_list = [data_info_tab, data_exp_tab, feature_importance_exp_tab, class_rules_exp_tab, settings_tab ]
-#dev_user_examples_list = [what_if_subtab, why_not_subtab, when_subtab]
+# Data Info, Data Exploration, Feature Importance, Class Rules, and Examples
+dev_user_profile_values = [1, 2, 3, 4, 5, 6, 7, 8]
 
-user_user_profile_vlaues = [0, 1, 3, 5, 6, 7]   # Data Info, Feature Importance, and Examples
-#user_user_profile_list = [data_info_tab, feature_importance_exp_tab, settings_tab ]
-#user_user_examples_list = [what_if_subtab, why_not_subtab]
+# Data Info, Feature Importance, and Examples
+user_user_profile_vlaues = [0, 1, 3, 5, 6, 7]
 
-business_user_profile_vlaues = [0, 1, 3, 5, 6, 7]   # Data Info, Feature Importance, and Examples
-#business_user_profile_list = [data_info_tab, feature_importance_exp_tab, settings_tab ]
-#business_user_examples_list = [what_if_subtab, why_not_subtab]
+# Data Info, Feature Importance, and Examples
+business_user_profile_vlaues = [0, 1, 3, 5, 6, 7]
 
-regulatory_user_profile_vlaues = [0, 1, 2, 3, 5, 8]  # Data Info, Data Exploration, Feature Importance, and Examples
-#regulatory_user_profile_list = [data_info_tab, data_exp_tab, feature_importance_exp_tab, settings_tab ]
-#regulatory_user_examples_list = [when_subtab]
+# Data Info, Data Exploration, Feature Importance, and Examples
+regulatory_user_profile_vlaues = [0, 1, 2, 3, 5, 8]
 
-affected_user_profile_vlaues = [0, 1, 3, 5, 6, 7]  # Data Info, Feature Importance, and Examples
-#affected_user_profile_list = [data_info_tab, feature_importance_exp_tab, settings_tab ]
-#affected_user_examples_list = [what_if_subtab, why_not_subtab]
+# Data Info, Feature Importance, and Examples
+affected_user_profile_vlaues = [0, 1, 3, 5, 6, 7]
 
 
 
@@ -944,7 +914,7 @@ def switch_to_dev_user_profile(dev_nc, user_nc, business_nc, regulatory_nc, affe
     return new_exp_list, new_exp_val_list
 
 
-# --- Predict --------------------------------------------------------------------------------
+# --- Predict ------------------------------------------------------------------------------------------
 @app.callback(
     Output('prediction_output', 'children', allow_duplicate=True),
     Input('predict_button', 'n_clicks'),
@@ -987,7 +957,7 @@ def update_prediction(n_clicks, sepal_length, sepal_width, petal_length, petal_w
     return pred_string
 
 
-# --- Input Overview ------------------------------------------------------------------------------
+# --- Input Overview -----------------------------------------------------------------------------------
 @app.callback(
     Output(component_id='de_inputs_overview_out', component_property='children'),
     Input('predict_button', 'n_clicks')
@@ -1008,7 +978,7 @@ def update_input_overview(n_clicks):
     return dbc.Table(table_header + [html.Tbody(table_body)])
 
 
-# --- Histogram -----------------------------------------------------------------------------------
+# --- Histogram ----------------------------------------------------------------------------------------
 @app.callback(
     Output(component_id='histogram', component_property='figure'),
     [   Input('predict_button', 'n_clicks'),
@@ -1018,7 +988,7 @@ def update_histogram(n_clicks, feature):
     return px.histogram(dataset_df, x='target_names', y=feature, histfunc='avg')
 
 
-# --- Box Plot ------------------------------------------------------------------------------------
+# --- Box Plot -----------------------------------------------------------------------------------------
 @app.callback(
     Output(component_id='de_boxplot_graph', component_property='figure'),
     [   Input('predict_button', 'n_clicks'),
@@ -1032,7 +1002,7 @@ def update_box_plot(n_clicks, feature, display_points):
         return px.box(dataset_df, x='target_names', y=feature)
 
 
-# --- Scatter Plot --------------------------------------------------------------------------------
+# --- Scatter Plot -------------------------------------------------------------------------------------
 @app.callback(
     Output(component_id='de_scatterplot_graph', component_property='figure'), 
     [   Input('predict_button', 'n_clicks'),
@@ -1043,7 +1013,7 @@ def update_de_scatterplot(n_clicks, y_feature, x_feature):
     return px.scatter(dataset_df, y=y_feature, x=x_feature, color='target_names')
 
 
-# --- Why Global Plot -----------------------------------------------------------------------------
+# --- Why Global Plot ----------------------------------------------------------------------------------
 @app.callback(
     Output(component_id='why_global_plottype_title', component_property='children'), 
     Output(component_id='why_global_plottype_figure', component_property='figure'), 
@@ -1068,7 +1038,7 @@ def update_de_global_feature_importance_plot(plottype):
             return "Overview of SHAP's global mean absolute values", shap_global_importance_plot
 
 
-# --- Why SHAP Plots ------------------------------------------------------------------------------
+# --- Why SHAP Plots -----------------------------------------------------------------------------------
 @app.callback(
     Output(component_id='why_shap_figure', component_property='children'), 
     [   Input('predict_button', 'n_clicks'),
@@ -1106,7 +1076,7 @@ def update_why_shapplot(n_clicks, plottype, feature_no_int):
     return html.Img(src=fig_bar_matplotlib, style={'width':'90%'})
 
 
-# --- Why Local LIME Plots ------------------------------------------------------------------------
+# --- Why Local LIME Plots -----------------------------------------------------------------------------
 @app.callback(
     Output(component_id='why_local_lime_figure', component_property='children'),
     [   Input('predict_button', 'n_clicks'),
@@ -1138,7 +1108,7 @@ def update_why_local_limeplot(n_clicks, feature_no_int):
     return plot
 
 
-# --- Anchor Table --------------------------------------------------------------------------------
+# --- Anchor Table -------------------------------------------------------------------------------------
 @app.callback(
     Output(component_id='anchor_why_out', component_property='children'), 
     [ Input('predict_button', 'n_clicks'),
@@ -1169,7 +1139,7 @@ def update_de_anchor_table(n_clicks, format_type, anchor_threshold):
         return []
 
 
-# --- DiCE Why Not Table --------------------------------------------------------------------------
+# --- DiCE Why Not Table -------------------------------------------------------------------------------
 @app.callback(
     Output(component_id='dice_why_not_out', component_property='children'), 
     [ Input('dice_why_not_generation_button', 'n_clicks'),
@@ -1271,7 +1241,7 @@ def update_dice_why_not(n_clicks, example_no, threshold, varying_features_input,
         return []
 
 
-# --- DiCE What If Table --------------------------------------------------------------------------
+# --- DiCE What If Table -------------------------------------------------------------------------------
 @app.callback(
     Output(component_id='dice_what_if_out', component_property='children'), 
     [ Input('dice_what_if_generation_button', 'n_clicks'),
@@ -1336,7 +1306,7 @@ def update_dice_what_if(n_clicks, example_no, threshold, varying_features_input,
         return []
 
 
-# --- DiCE When Table -----------------------------------------------------------------------------
+# --- DiCE When Table ----------------------------------------------------------------------------------
 @app.callback(
     Output(component_id='dice_when_out', component_property='children'), 
     [ Input('dice_when_generation_button', 'n_clicks'),

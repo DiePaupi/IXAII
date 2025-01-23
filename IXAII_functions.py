@@ -113,6 +113,7 @@ def get_prototypical_input_sets(dataset_df, target_names, feature_list):
 # 3) Get model and explainer according to the chosen ML method
 ########################################################################################################
 
+# NOTE: Using XGBClassifier does not work in combination with SHAP here!
 def get_model(ml_method):
     match ml_method:
         case 'MLPReg':
