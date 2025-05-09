@@ -21,3 +21,6 @@ Note that you'll need to install the following packages to run IXAII (e.g., via 
 - sklearn
 - time
 - xgboost
+
+Further note that IXAII currently requires dash 2.18.2 and dash-bootstrap-components 1.7.1 to run.
+For specifications please see the requirements.txt
